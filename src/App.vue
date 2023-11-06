@@ -100,6 +100,7 @@ const imageUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprit
 const getPokemonPage = async (pageType) => {
     const page =  pageType === 'Next' ? nextPage.value : previousPage.value;
     if(!page){ return };
+    pokeCardLoading.value = false;
     isLoading.value = true;
     showList.value = false;
     currentPokemon.value = null;
@@ -173,7 +174,7 @@ const chosePkCardBGColor = (type) => {
         case 'poison':
         case 'ghost':
         case 'psychic':
-            pokeCardBG.value = '#8129c6';
+            pokeCardBG.value = 'rgb(182 97 249)';
             break;
         case 'dark':
             pokeCardBG.value = 'rgb(71 70 73)';
