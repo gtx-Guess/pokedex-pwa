@@ -400,7 +400,8 @@ main{
             background: white;
             border-radius: 50%;
             border: 4px solid #000;
-            position: relative;
+            position: absolute;
+            top: 50%;
             animation: spin 1.5s linear infinite;
         }
 
