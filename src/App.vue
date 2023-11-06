@@ -18,9 +18,9 @@
         </div>
         <div v-else>
             <div v-if="showList" class="pokemon-list">
-                <form class="pokemon" v-for="pm in pokemonList" :key="`poke` + pm.id">
+                <form class="pokemon" v-for="pm in pokemonList" :key="`poke` + pm.id" @click=pokemonCardClicked(pm)>
                     <img :src=pm.img alt="pokemon image" loading="lazy">
-                    <p>{{ pm.name }}</p>
+                    <p>{{ formatText(pm.name) }}</p>
                 </form>
             </div>
             <!-- <div v-if="showFilteredList" class="pokemon-list">
@@ -29,6 +29,32 @@
                     <p>{{ pm.name }}</p>
                 </form>
             </div> -->
+        </div>
+        <div v-if="currentPokemon" class="poke-card-outer">
+            <div class="pokemon-card">
+                <div class="pokemon-top-card" :style="{backgroundColor: pokeCardBG}">
+                    <div class="pk-card-header">
+                        <h1 style="font-size: 22pt; font-weight: normal; margin: 4px;">
+                            {{ currentPokemon.name }}
+                        </h1>
+                        <div style="width: 35%; display: flex; align-items: center; justify-content: space-around;">
+                            <span style="font-size: 16pt;">HP</span>
+                            <span style="font-weight: normal; font-size: 18pt;">{{ currentPokemon.hp }}</span>
+                            <img style="height: 30pt; margin: 0; padding: 0; border: yellow 1px solid; border-radius: 25px;" :src="'/icons/' + currentPokemon.type + '_type.png'" alt="type" loading="lazy">
+                        </div>
+                    </div>
+                    <span class="pk-bg-img-span" style="width: 90%; display: flex; justify-content: center; border: 2vw solid yellow; background-color: white;"><img class="pk-img" :src=currentPokemon.img alt="pokemon image" loading="lazy"></span>
+                    <div class="pk-stats">
+                        <p>Height: {{ currentPokemon.ht }} ft</p>
+                        <p>Weight: {{ currentPokemon.wt }} lb</p>
+                    </div>
+                    <div class="pk-card-stats">
+                        <p class="pk-moves"><span>{{ currentPokemon.m1.name }}</span> <span>{{ currentPokemon.m1.power }}</span></p>
+                        <p class="pk-moves"><span>{{ currentPokemon.m2.name }}</span> <span>{{ currentPokemon.m2.power }}</span></p>
+                    </div>
+                </div>
+                <button class="exit-pk" @click="closePokemonCard">close</button>
+            </div>
         </div>
         <span class="page-buttons">
             <button v-if=" previousPage !== null " @click="getPokemonPage('Previous')">Previous Page</button>
@@ -46,6 +72,8 @@ const showList = ref(true);
 const pokemonList = ref([]);
 const nextPage = ref(null);
 const previousPage = ref(null);
+const currentPokemon = ref(null);
+const pokeCardBG = ref('grey');
 const imageUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
 
 (async () => {
@@ -68,6 +96,7 @@ const getPokemonPage = async (pageType) => {
     if(!page){ return };
     isLoading.value = true;
     showList.value = false;
+    currentPokemon.value = null;
     let resp = await P.resource([ page ]);
     resp = resp[0];
     resp.results.forEach(p => {
@@ -95,6 +124,88 @@ const preLoadImages = async (pokemonList) => {
     await Promise.all(imagePromises);
 };
 
+const pokemonCardClicked = async (pokemon) => {
+    pokemon = currentPokemon.value === pokemon ? null : pokemon;
+    if(!pokemon){return};
+    const resp = await P.getPokemonByName(pokemon.name);
+    pokemon.name = formatText(pokemon.name);
+    pokemon.hp = resp.stats[0].base_stat;
+    pokemon.wt = resp.weight;
+    pokemon.ht = resp.height;
+    pokemon.type = resp.types[0].type.name;
+    pokemon.m1 = { 
+        name: formatText(resp.moves[0].move.name), 
+        power: Math.floor((Math.floor(Math.random() * (80 - 10 + 1 )) + 10)/10) * 10
+    };
+    pokemon.m2 = {
+        name: formatText(resp.moves[1].move.name),
+        power: Math.floor((Math.floor(Math.random() * (200 - 50 + 1 )) + 50)/10) * 10
+    };
+    chosePkCardBGColor(pokemon.type);
+    currentPokemon.value = pokemon;
+    console.log(resp);
+    console.log(currentPokemon);
+};
+
+const closePokemonCard = () => {
+    currentPokemon.value = null;
+};
+
+const chosePkCardBGColor = (type) => {
+    switch(type){
+        case 'fire':
+            pokeCardBG.value = 'rgb(255, 155, 144)';
+            break;
+        case 'water':
+        case 'ice':
+            pokeCardBG.value = '#5e5eff';
+            break;
+        case 'grass':
+        case 'bug': 
+            pokeCardBG.value = '#a9e947';
+            break;
+        case 'poison':
+        case 'ghost':
+        case 'psychic':
+            pokeCardBG.value = '#8129c6';
+            break;
+        case 'dark':
+            pokeCardBG.value = 'rgb(71 70 73)';
+            break;
+        case 'normal':
+        case 'steel':
+            pokeCardBG.value = 'rgb(203 203 203)';
+            break;
+        case 'flying':
+        case 'dragon':
+            pokeCardBG.value = 'rgb(175 175 242)';
+            break;
+        case 'fairy':
+            pokeCardBG.value = 'rgb(250 93 204)';
+            break;
+        case 'electric':
+            pokeCardBG.value = '#efef8f';
+            break;
+        case 'fighting': 
+            pokeCardBG.value = '#a73333';
+            break;
+        case 'rock':
+        case 'ground':
+            pokeCardBG.value = '#916262';
+            break;
+        default:
+            pokeCardBG.value = 'white'
+            break;
+    };
+};
+
+const formatText = (text) => {
+    if( text.includes('-') ){
+            text = text.replace('-', ' ');
+    }
+    return text.charAt(0).toUpperCase() + text.slice(1);
+};
+
 </script>
 
 
@@ -113,6 +224,8 @@ $h-color: #32db8f;
 }
 
 header{
+    position: relative;
+    z-index: 2000;
     display: flex;
     width: 100vw;
     background-color: $h-color;
@@ -135,15 +248,108 @@ header{
         svg{
             font-size: 30pt;
         }
-        // &:hover{
-        //     background: transparentize(black, 0.7);
-        // }
     }
 }
 
 main{
     padding-top: 2vh;
 
+    .poke-card-outer{
+        top: 8.9%;
+        position: absolute;
+        z-index: 10;
+        color: black;
+        width: 100vw;
+        height: 106vh;
+        background: rgba(0, 0, 0, 0.498);
+    }
+    .clickable-pokeball{
+        top: 54%;
+        position: absolute;
+        height: 50pt;
+        animation: wiggle .7s ease infinite;
+    }
+    @keyframes wiggle {
+        0%, 100% { transform: rotate(0); }
+        25% { transform: rotate(-10deg); }
+        75% { transform: rotate(10deg); }
+    }
+    .pokemon-card{
+        display: flex;
+        top: 5%;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        position: absolute;
+        color: black;
+        width: 100vw;
+        height: 100vh;
+        .exit-pk{
+            position: absolute;
+            width: 25vw;
+            height: 6vh;
+            top: 90%;
+        }
+
+        .pokemon-top-card{
+            display: flex;
+            flex-direction: column;
+            background: white;
+            width: 90vw;
+            height: 85vh;
+            border: 3vw solid yellow;
+            border-radius: 10px;
+            align-items: center;
+            box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.5);
+            .pk-bg-img-span{
+                background-image: url('/icons/gal2.png');
+                background-size: cover; /* or other values like 'contain' */
+                background-position: center center; /* or other positions */
+                background-repeat: no-repeat;
+            }
+            .pk-img{
+                width: 65%;
+            }
+            .pk-card-header{
+                display: flex;
+                justify-content: space-between;
+                width: 98%;
+                margin: 7px;
+            }
+            .pk-stats{
+                display: flex; 
+                font-size: 10pt;
+                justify-content: space-between; 
+                width: 45%; 
+                background: yellow;
+                box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.5);
+            }
+            .pk-card-stats{
+                margin-top: 10px;
+                width: 90%;
+                height: 25%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-evenly;
+                font-size: 15pt;
+
+                .pk-moves{
+                    display: flex;
+                    justify-content: space-between;
+                }
+            }
+        }
+    }
+    
+
+    .pokemon-bottom-card{
+        display: flex;
+        background: white;
+        width: 90vw;
+        height: 30vh;
+        // align-items: center;
+        // justify-content: center;
+    }
     .page-buttons{
         padding: 3vh 0;
         display: flex;
