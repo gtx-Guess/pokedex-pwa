@@ -30,30 +30,35 @@
                 </form>
             </div> -->
         </div>
-        <div v-if="currentPokemon" class="poke-card-outer">
-            <div class="pokemon-card">
-                <div class="pokemon-top-card" :style="{backgroundColor: pokeCardBG}">
-                    <div class="pk-card-header">
-                        <h1 style="font-size: 22pt; font-weight: normal; margin: 4px;">
-                            {{ currentPokemon.name }}
-                        </h1>
-                        <div style="width: 35%; display: flex; align-items: center; justify-content: space-around;">
-                            <span style="font-size: 16pt;">HP</span>
-                            <span style="font-weight: normal; font-size: 18pt;">{{ currentPokemon.hp }}</span>
-                            <img style="height: 30pt; margin: 0; padding: 0; border: yellow 1px solid; border-radius: 25px;" :src="'/icons/' + currentPokemon.type + '_type.png'" alt="type" loading="lazy">
+        <div v-if="pokeCardLoading" class="poke-card-loading">
+                <img class="pokeball-img" src="/pokeball.svg" alt="Svg Image">
+            </div>
+        <div v-else>
+            <div v-if="currentPokemon" class="poke-card-outer">
+                <div class="pokemon-card">
+                    <div class="pokemon-top-card" :style="{backgroundColor: pokeCardBG}">
+                        <div class="pk-card-header">
+                            <h1 style="font-size: 22pt; font-weight: normal; margin: 4px;">
+                                {{ currentPokemon.name }}
+                            </h1>
+                            <div style="width: 35%; display: flex; align-items: center; justify-content: space-around;">
+                                <span style="font-size: 16pt;">HP</span>
+                                <span style="font-weight: normal; font-size: 18pt;">{{ currentPokemon.hp }}</span>
+                                <img style="height: 30pt; margin: 0; padding: 0; border: yellow 1px solid; border-radius: 25px;" :src="'/icons/' + currentPokemon.type + '_type.png'" alt="type" loading="lazy">
+                            </div>
+                        </div>
+                        <span class="pk-bg-img-span" style="width: 90%; display: flex; justify-content: center; border: 2vw solid yellow; background-color: white;"><img class="pk-img" :src=currentPokemon.img alt="pokemon image" loading="lazy"></span>
+                        <div class="pk-stats">
+                            <p>Height: {{ currentPokemon.ht }} ft</p>
+                            <p>Weight: {{ currentPokemon.wt }} lb</p>
+                        </div>
+                        <div class="pk-card-stats">
+                            <p class="pk-moves"><span>{{ currentPokemon.m1.name }}</span> <span>{{ currentPokemon.m1.power }}</span></p>
+                            <p class="pk-moves"><span>{{ currentPokemon.m2.name }}</span> <span>{{ currentPokemon.m2.power }}</span></p>
                         </div>
                     </div>
-                    <span class="pk-bg-img-span" style="width: 90%; display: flex; justify-content: center; border: 2vw solid yellow; background-color: white;"><img class="pk-img" :src=currentPokemon.img alt="pokemon image" loading="lazy"></span>
-                    <div class="pk-stats">
-                        <p>Height: {{ currentPokemon.ht }} ft</p>
-                        <p>Weight: {{ currentPokemon.wt }} lb</p>
-                    </div>
-                    <div class="pk-card-stats">
-                        <p class="pk-moves"><span>{{ currentPokemon.m1.name }}</span> <span>{{ currentPokemon.m1.power }}</span></p>
-                        <p class="pk-moves"><span>{{ currentPokemon.m2.name }}</span> <span>{{ currentPokemon.m2.power }}</span></p>
-                    </div>
+                    <button class="exit-pk" @click="closePokemonCard">close</button>
                 </div>
-                <button class="exit-pk" @click="closePokemonCard">close</button>
             </div>
         </div>
         <span class="page-buttons">
@@ -68,6 +73,7 @@ import { ref } from 'vue';
 
 const P = new Pokedex.Pokedex();
 const isLoading = ref(false);
+const pokeCardLoading = ref(false);
 const showList = ref(true);
 const pokemonList = ref([]);
 const nextPage = ref(null);
@@ -125,8 +131,7 @@ const preLoadImages = async (pokemonList) => {
 };
 
 const pokemonCardClicked = async (pokemon) => {
-    pokemon = currentPokemon.value === pokemon ? null : pokemon;
-    if(!pokemon){return};
+    pokeCardLoading.value = true;
     const resp = await P.getPokemonByName(pokemon.name);
     pokemon.name = formatText(pokemon.name);
     pokemon.hp = resp.stats[0].base_stat;
@@ -143,8 +148,9 @@ const pokemonCardClicked = async (pokemon) => {
     };
     chosePkCardBGColor(pokemon.type);
     currentPokemon.value = pokemon;
-    console.log(resp);
-    console.log(currentPokemon);
+    pokeCardLoading.value = false;
+    // console.log(resp);
+    // console.log(currentPokemon);
 };
 
 const closePokemonCard = () => {
@@ -254,26 +260,52 @@ header{
 main{
     padding-top: 2vh;
 
+    .poke-card-loading{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .pokeball-img{
+            height: 100pt;
+            background: white;
+            border-radius: 50%;
+            border: 4px solid #000;
+            position: absolute;
+            top: 40%;
+            animation: spinZ 1.5s linear infinite;
+        }
+
+        @keyframes spinZ {
+            0% {
+                transform: rotateY(0deg);
+            }
+            100% {
+                transform: rotateY(360deg);
+            }
+        }
+    }
+
     .poke-card-outer{
-        top: 8.9%;
+        top: 7%;
         position: absolute;
         z-index: 10;
         color: black;
         width: 100vw;
-        height: 106vh;
+        height: 107vh;
         background: rgba(0, 0, 0, 0.498);
     }
-    .clickable-pokeball{
-        top: 54%;
-        position: absolute;
-        height: 50pt;
-        animation: wiggle .7s ease infinite;
-    }
-    @keyframes wiggle {
-        0%, 100% { transform: rotate(0); }
-        25% { transform: rotate(-10deg); }
-        75% { transform: rotate(10deg); }
-    }
+    // .clickable-pokeball{
+    //     top: 54%;
+    //     position: absolute;
+    //     height: 50pt;
+    //     animation: wiggle .7s ease infinite;
+    // }
+    // @keyframes wiggle {
+    //     0%, 100% { transform: rotate(0); }
+    //     25% { transform: rotate(-10deg); }
+    //     75% { transform: rotate(10deg); }
+    // }
     .pokemon-card{
         display: flex;
         top: 5%;
@@ -288,7 +320,7 @@ main{
             position: absolute;
             width: 25vw;
             height: 6vh;
-            top: 90%;
+            top: 80%;
         }
 
         .pokemon-top-card{
@@ -297,6 +329,7 @@ main{
             background: white;
             width: 90vw;
             height: 85vh;
+            max-height: 600px;
             border: 3vw solid yellow;
             border-radius: 10px;
             align-items: center;
@@ -321,11 +354,12 @@ main{
                 font-size: 10pt;
                 justify-content: space-between; 
                 width: 45%; 
+                min-width: 180px;
                 background: yellow;
                 box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.5);
             }
             .pk-card-stats{
-                margin-top: 10px;
+                margin-top: 30px;
                 width: 90%;
                 height: 25%;
                 display: flex;
@@ -340,16 +374,7 @@ main{
             }
         }
     }
-    
 
-    .pokemon-bottom-card{
-        display: flex;
-        background: white;
-        width: 90vw;
-        height: 30vh;
-        // align-items: center;
-        // justify-content: center;
-    }
     .page-buttons{
         padding: 3vh 0;
         display: flex;
