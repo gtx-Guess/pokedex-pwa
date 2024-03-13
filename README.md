@@ -2,7 +2,7 @@
 
 This is a single page vue app that lists pokemon images and names by querying the PokeApi REST api. After listing the pokemon titles out it makes them clickable as well and once clicked it will open up a pokemon card with relevant stats from that pokemon.
 
-This is also hosted live on railway. currently so its available on pc, tablet/ipad, and mobile. When on mac, ipad, or mobile you have the option to download the app as a pwa so taht you can use it natively on your device like an app. 
+This is also hosted live on railway currently so it is available on pc, tablet/ipad, and mobile. When on mac, ipad, or mobile you have the option to download the app as a pwa so that you can use it natively on your device like an app. 
 
 Live site: https://pokedex-pwa.up.railway.app/
 
