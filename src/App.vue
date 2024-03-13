@@ -23,6 +23,7 @@
                     <p>{{ formatText(pm.name) }}</p>
                 </form>
             </div>
+            <!-- Not implemented yet, this would be how you show a filtered pokemon list via the search bar -->
             <!-- <div v-if="showFilteredList" class="pokemon-list">
                 <form class="pokemon" v-for="pm in pokemonList" :key="`poke` + pm.id">
                     <img :src=pm.img alt="pokemon image">
@@ -38,16 +39,14 @@
                 <div class="pokemon-card">
                     <div class="pokemon-top-card" :style="{backgroundColor: pokeCardBG}">
                         <div class="pk-card-header">
-                            <h1 style="font-size: 22pt; font-weight: normal; margin: 4px;">
-                                {{ currentPokemon.name }}
-                            </h1>
-                            <div style="width: 35%; display: flex; align-items: center; justify-content: space-around;">
-                                <span style="font-size: 16pt;">HP</span>
-                                <span style="font-weight: normal; font-size: 18pt;">{{ currentPokemon.hp }}</span>
-                                <img style="height: 30pt; margin: 0; padding: 0; border: yellow 1px solid; border-radius: 25px;" :src="'/icons/' + currentPokemon.type + '_type.png'" alt="type" loading="lazy">
+                            <h1 class="pk-header-name"> {{ currentPokemon.name }} </h1>
+                            <div class="pk-header-stats-right">
+                                <span>HP</span>
+                                <span>{{ currentPokemon.hp }}</span>
+                                <img :src="'/icons/' + currentPokemon.type + '_type.png'" alt="type" loading="lazy">
                             </div>
                         </div>
-                        <span class="pk-bg-img-span" style="width: 90%; display: flex; justify-content: center; border: 2vw solid yellow; background-color: white;"><img class="pk-img" :src=currentPokemon.img alt="pokemon image" loading="lazy"></span>
+                        <span class="pk-bg-img-span"><img class="pk-img" :src=currentPokemon.img alt="pokemon image" loading="lazy"></span>
                         <div class="pk-stats">
                             <p>Height: {{ currentPokemon.ht }} ft</p>
                             <p>Weight: {{ currentPokemon.wt }} lb</p>
@@ -132,24 +131,31 @@ const preLoadImages = async (pokemonList) => {
 };
 
 const pokemonCardClicked = async (pokemon) => {
-    pokeCardLoading.value = true;
-    const resp = await P.getPokemonByName(pokemon.name);
-    pokemon.name = formatText(pokemon.name);
-    pokemon.hp = resp.stats[0].base_stat;
-    pokemon.wt = resp.weight;
-    pokemon.ht = resp.height;
-    pokemon.type = resp.types[0].type.name;
-    pokemon.m1 = { 
-        name: formatText(resp.moves[0].move.name), 
-        power: Math.floor((Math.floor(Math.random() * (80 - 10 + 1 )) + 10)/10) * 10
-    };
-    pokemon.m2 = {
-        name: formatText(resp.moves[1].move.name),
-        power: Math.floor((Math.floor(Math.random() * (200 - 50 + 1 )) + 50)/10) * 10
-    };
-    chosePkCardBGColor(pokemon.type);
-    currentPokemon.value = pokemon;
-    pokeCardLoading.value = false;
+    if(!pokemon.clicked){
+        pokeCardLoading.value = true;
+        const resp = await P.getPokemonByName(pokemon.name);
+        pokemon.clicked = false;
+        pokemon.name = formatText(pokemon.name);
+        pokemon.hp = resp.stats[0].base_stat;
+        pokemon.wt = resp.weight;
+        pokemon.ht = resp.height;
+        pokemon.type = resp.types[0].type.name;
+        pokemon.m1 = { 
+            name: formatText(resp.moves[0].move.name), 
+            power: Math.floor((Math.floor(Math.random() * (80 - 10 + 1 )) + 10)/10) * 10
+        };
+        pokemon.m2 = {
+            name: formatText(resp.moves[1].move.name),
+            power: Math.floor((Math.floor(Math.random() * (200 - 50 + 1 )) + 50)/10) * 10
+        };
+        chosePkCardBGColor(pokemon.type);
+        currentPokemon.value = pokemon;
+        pokeCardLoading.value = false;
+        pokemon.clicked = true;
+    }else{
+        currentPokemon.value = pokemon;
+    }
+
     // console.log(resp);
     // console.log(currentPokemon);
 };
@@ -230,9 +236,10 @@ $h-color: #32db8f;
     // }
 }
 
+/* CSS for mobile  */
 header{
     position: relative;
-    z-index: 2000;
+    z-index: 9000;
     display: flex;
     width: 100vw;
     background-color: $h-color;
@@ -287,15 +294,6 @@ main{
         }
     }
 
-    .poke-card-outer{
-        top: 7%;
-        position: absolute;
-        z-index: 10;
-        color: black;
-        width: 100vw;
-        height: 107vh;
-        background: rgba(0, 0, 0, 0.498);
-    }
     // .clickable-pokeball{
     //     top: 54%;
     //     position: absolute;
@@ -307,6 +305,16 @@ main{
     //     25% { transform: rotate(-10deg); }
     //     75% { transform: rotate(10deg); }
     // }
+
+    .poke-card-outer{
+        top: 7%;
+        position: absolute;
+        z-index: 10;
+        color: black;
+        width: 100vw;
+        height: 107vh;
+        background: rgba(0, 0, 0, 0.498);
+    }
     .pokemon-card{
         display: flex;
         top: 5%;
@@ -340,6 +348,10 @@ main{
                 background-size: cover; /* or other values like 'contain' */
                 background-position: center center; /* or other positions */
                 background-repeat: no-repeat;
+                width: 90%; display: flex; 
+                justify-content: center; 
+                border: 2vw solid yellow; 
+                background-color: white;
             }
             .pk-img{
                 width: 65%;
@@ -349,6 +361,31 @@ main{
                 justify-content: space-between;
                 width: 98%;
                 margin: 7px;
+                .pk-header-name{
+                    font-size: 22pt; 
+                    font-weight: normal; 
+                    margin: 4px;
+                }
+                .pk-header-stats-right{
+                    width: 35%; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: space-around;
+                    & span:nth-child(1){
+                        font-size: 16pt;
+                    }
+                    & span:nth-child(2){
+                        font-weight: normal; 
+                        font-size: 18pt;
+                    }
+                    & img{
+                        height: 30pt; 
+                        margin: 0; 
+                        padding: 0; 
+                        border: yellow 1px solid; 
+                        border-radius: 25px;
+                    }
+                }    
             }
             .pk-stats{
                 display: flex; 
@@ -494,6 +531,537 @@ main{
     }
 }
 
+/* Media query for tablets */
+@media (min-width: 450px) {
+
+    main {
+        .poke-card-outer{
+            top: 7%;
+            position: absolute;
+            z-index: 10;
+            color: black;
+            width: 100vw;
+            height: 107vh;
+            background: rgba(0, 0, 0, 0.498);
+
+        }
+        .pokemon-card{
+            display: flex;
+            top: 5%;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: absolute;
+            color: black;
+            width: 100vw;
+            height: 100vh;
+            overflow: visible;
+            .exit-pk{
+                position: absolute;
+                width: 25vw;
+                height: 6vh;
+                top: 90%;
+            }
+
+            .pokemon-top-card{
+                display: flex;
+                flex-direction: column;
+                background: white;
+                width: 80vw;
+                height: 85vh;
+                max-height: 100%;
+                border: 2vw solid yellow;
+                border-radius: 10px;
+                align-items: center;
+                box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.5);
+                .pk-bg-img-span{
+                    background-image: url('/icons/gal2.png');
+                    background-size: cover; /* or other values like 'contain' */
+                    background-position: center center; /* or other positions */
+                    background-repeat: no-repeat;
+                    width: 90%; display: flex; 
+                    justify-content: center; 
+                    border: 1vw solid yellow; 
+                    background-color: white;
+                }
+                .pk-img{
+                    width: 65%;
+                }
+                .pk-card-header{
+                    display: flex;
+                    justify-content: space-between;
+                    width: 98%;
+                    margin: 7px;
+                    .pk-header-name{
+                        font-size: 25pt; 
+                        font-weight: normal; 
+                        margin: 4px;
+                        margin-left: 30px;
+                    }
+                    .pk-header-stats-right{
+                        width: 30%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: space-around;
+                        & span:nth-child(1){
+                            font-size: 20pt;
+                        }
+                        & span:nth-child(2){
+                            font-weight: normal; 
+                            font-size: 22pt;
+                        }
+                        & img{
+                            height: 35pt; 
+                            margin: 0; 
+                            padding: 0; 
+                            border: yellow 2px solid; 
+                            border-radius: 50px;
+                        }
+                    }
+                }
+                .pk-stats{
+                    display: flex; 
+                    font-size: 10pt;
+                    justify-content: space-between; 
+                    width: 45%; 
+                    min-width: 180px;
+                    background: yellow;
+                    box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.5);
+                }
+                .pk-card-stats{
+                    margin-top: 30px;
+                    width: 90%;
+                    height: 25%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-evenly;
+                    font-size: 20pt;
+
+                    .pk-moves{
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                }
+            }
+        }
+        .page-buttons{
+            padding: 6vh 0;
+            display: flex;
+            width: 100vw;
+            justify-content: center;
+
+            & > button{
+                width: 20%;
+                font-size: 15pt;
+            }
+        }
+    }
+}
+
+@media (min-width: 768px) {
+
+    main {
+        .poke-card-outer{
+            top: 7%;
+            position: absolute;
+            z-index: 10;
+            color: black;
+            width: 100vw;
+            height: 107vh;
+            background: rgba(0, 0, 0, 0.498);
+
+        }
+        .pokemon-card{
+            display: flex;
+            top: 5%;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: absolute;
+            color: black;
+            width: 100vw;
+            height: 100vh;
+            overflow: visible;
+            .exit-pk{
+                position: absolute;
+                width: 25vw;
+                height: 6vh;
+                top: 101%;
+            }
+
+            .pokemon-top-card{
+                display: flex;
+                flex-direction: column;
+                background: white;
+                width: 60vw;
+                height: 100vh;
+                max-height: 100%;
+                border: 1vw solid yellow;
+                border-radius: 10px;
+                align-items: center;
+                box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.5);
+                .pk-bg-img-span{
+                    background-image: url('/icons/gal2.png');
+                    background-size: cover; /* or other values like 'contain' */
+                    background-position: center center; /* or other positions */
+                    background-repeat: no-repeat;
+                    width: 90%; display: flex; 
+                    justify-content: center; 
+                    border: 1vw solid yellow; 
+                    background-color: white;
+                }
+                .pk-img{
+                    width: 65%;
+                }
+                .pk-card-header{
+                    display: flex;
+                    justify-content: space-between;
+                    width: 98%;
+                    margin: 7px;
+                    .pk-header-name{
+                        font-size: 25pt; 
+                        font-weight: normal; 
+                        margin: 4px;
+                        margin-left: 30px;
+                    }
+                    .pk-header-stats-right{
+                        width: 30%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: space-around;
+                        & span:nth-child(1){
+                            font-size: 20pt;
+                        }
+                        & span:nth-child(2){
+                            font-weight: normal; 
+                            font-size: 22pt;
+                        }
+                        & img{
+                            height: 45pt; 
+                            margin: 0; 
+                            padding: 0; 
+                            border: yellow 2px solid; 
+                            border-radius: 50px;
+                        }
+                    }
+                }
+                .pk-stats{
+                    display: flex; 
+                    font-size: 12pt;
+                    justify-content: space-between; 
+                    width: 45%; 
+                    min-width: 180px;
+                    background: yellow;
+                    box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.5);
+                }
+                .pk-card-stats{
+                    margin-top: 30px;
+                    width: 90%;
+                    height: 25%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-evenly;
+                    font-size: 20pt;
+
+                    .pk-moves{
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                }
+            }
+        }
+        .page-buttons{
+            padding: 6vh 0;
+            display: flex;
+            width: 100vw;
+            justify-content: center;
+
+            & > button{
+                width: 20%;
+                font-size: 15pt;
+            }
+        }
+    }
+}
+
+/* Media query for desktop screens */
+@media (min-width: 1000px) {
+    main {
+        .poke-card-outer{
+            top: 7%;
+            position: absolute;
+            z-index: 10;
+            color: black;
+            width: 100vw;
+            height: 107vh;
+            background: rgba(0, 0, 0, 0.498);
+
+        }
+        .pokemon-card{
+            display: flex;
+            top: 5%;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: absolute;
+            color: black;
+            width: 100vw;
+            height: 100vh;
+            overflow: visible;
+            .exit-pk{
+                position: absolute;
+                width: 25vw;
+                height: 6vh;
+                top: 105%;
+            }
+
+            .pokemon-top-card{
+                display: flex;
+                flex-direction: column;
+                background: white;
+                width: 50vw;
+                height: 100vh;
+                max-height: 100%;
+                border: 1vw solid yellow;
+                border-radius: 10px;
+                align-items: center;
+                box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.5);
+                .pk-bg-img-span{
+                    background-image: url('/icons/gal2.png');
+                    background-size: cover; /* or other values like 'contain' */
+                    background-position: center center; /* or other positions */
+                    background-repeat: no-repeat;
+                    width: 90%; display: flex; 
+                    justify-content: center; 
+                    border: 1vw solid yellow; 
+                    background-color: white;
+                }
+                .pk-img{
+                    width: 65%;
+                }
+                .pk-card-header{
+                    display: flex;
+                    justify-content: space-between;
+                    width: 98%;
+                    margin: 7px;
+                    .pk-header-name{
+                        font-size: 25pt; 
+                        font-weight: normal; 
+                        margin: 4px;
+                        margin-left: 30px;
+                    }
+                    .pk-header-stats-right{
+                        width: 30%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: space-around;
+                        & span:nth-child(1){
+                            font-size: 20pt;
+                        }
+                        & span:nth-child(2){
+                            font-weight: normal; 
+                            font-size: 22pt;
+                        }
+                        & img{
+                            height: 45pt; 
+                            margin: 0; 
+                            padding: 0; 
+                            border: yellow 2px solid; 
+                            border-radius: 50px;
+                        }
+                    }
+                }
+                .pk-stats{
+                    display: flex; 
+                    font-size: 15pt;
+                    justify-content: space-between; 
+                    width: 45%; 
+                    min-width: 180px;
+                    background: yellow;
+                    box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.5);
+                }
+                .pk-card-stats{
+                    margin-top: 30px;
+                    width: 90%;
+                    height: 25%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-evenly;
+                    font-size: 20pt;
+
+                    .pk-moves{
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                }
+            }
+        }
+        .page-buttons{
+            padding: 6vh 0;
+            display: flex;
+            width: 100vw;
+            justify-content: center;
+
+            & > button{
+                width: 20%;
+                font-size: 15pt;
+            }
+        }
+    }
+}
+@media (min-width: 1440px) {
+    header{
+        position: relative;
+        z-index: 9000;
+        display: flex;
+        width: 100vw;
+        background-color: $h-color;
+        padding: 10px 0;
+        h1{
+            width: 95%;
+            text-align: center;
+            font-size: 28pt;
+            margin-left: 110px;
+            // &::selection{
+            //     background: transparentize(#4299b8, 0.5);
+            // }
+        }
+        .drop{
+            width: 5%;
+            margin-right: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: transparent;
+            svg{
+                font-size: 30pt;
+            }
+        }
+    }
+
+    main {
+        .poke-card-outer{
+            top: 7%;
+            position: absolute;
+            z-index: 10;
+            color: black;
+            width: 100vw;
+            height: 107vh;
+            background: rgba(0, 0, 0, 0.498);
+
+        }
+        .pokemon-card{
+            display: flex;
+            top: 5%;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: absolute;
+            color: black;
+            width: 100vw;
+            height: 100vh;
+            overflow: visible;
+            .exit-pk{
+                position: absolute;
+                width: 25vw;
+                height: 6vh;
+                top: 105%;
+            }
+
+            .pokemon-top-card{
+                display: flex;
+                flex-direction: column;
+                background: white;
+                width: 40vw;
+                height: 100vh;
+                max-height: 100%;
+                border: 1vw solid yellow;
+                border-radius: 10px;
+                align-items: center;
+                box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.5);
+                .pk-bg-img-span{
+                    background-image: url('/icons/gal2.png');
+                    background-size: cover; /* or other values like 'contain' */
+                    background-position: center center; /* or other positions */
+                    background-repeat: no-repeat;
+                    width: 90%; display: flex; 
+                    justify-content: center; 
+                    border: 1vw solid yellow; 
+                    background-color: white;
+                }
+                .pk-img{
+                    width: 65%;
+                }
+                .pk-card-header{
+                    display: flex;
+                    justify-content: space-between;
+                    width: 98%;
+                    margin: 7px;
+                    .pk-header-name{
+                        font-size: 25pt; 
+                        font-weight: normal; 
+                        margin: 4px;
+                        margin-left: 30px;
+                    }
+                    .pk-header-stats-right{
+                        width: 30%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: space-around;
+                        & span:nth-child(1){
+                            font-size: 20pt;
+                        }
+                        & span:nth-child(2){
+                            font-weight: normal; 
+                            font-size: 22pt;
+                            margin-right: 30px;
+                        }
+                        & img{
+                            height: 45pt; 
+                            margin: 0; 
+                            padding: 0; 
+                            border: yellow 2px solid; 
+                            border-radius: 50px;
+                        }
+                    }
+                }
+                .pk-stats{
+                    display: flex; 
+                    font-size: 15pt;
+                    justify-content: space-between; 
+                    width: 45%; 
+                    min-width: 180px;
+                    background: yellow;
+                    box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.5);
+                }
+                .pk-card-stats{
+                    margin-top: 30px;
+                    width: 90%;
+                    height: 25%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-evenly;
+                    font-size: 20pt;
+
+                    .pk-moves{
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                }
+            }
+        }
+        .page-buttons{
+            padding: 6vh 0;
+            display: flex;
+            width: 100vw;
+            justify-content: center;
+
+            & > button{
+                width: 20%;
+                font-size: 15pt;
+            }
+        }
+    }
+}
 
 </style>
-
