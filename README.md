@@ -1,7 +1,19 @@
-# Vue 3 + Vite
+# This is my pokemon PWA app
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+This is a single page vue app that lists pokemon images and names by querying the PokeApi REST api. After listing the pokemon titles out it makes them clickable as well and once clicked it will open up a pokemon card with relevant stats from that pokemon.
 
-## Recommended IDE Setup
+This is also hosted live on railway. currently so its available on pc, tablet/ipad, and mobile. When on mac, ipad, or mobile you have the option to download the app as a pwa so taht you can use it natively on your device like an app. 
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+Live site: https://pokedex-pwa.up.railway.app/
+
+To do so you would need to click on download when prompted by your browser OR do it manually like so:
+- click the triple dots on the side to open chrome/safari settings
+- navigate down to the "Save and Share" section
+- click "Install Pokedex PWA"
+
+## How to run locally
+Do an npm install, vite install
+Npm run dev should do a local vite build.
+
+### Recommended IDE Setup
+- [VS Code](https://code.visualstudio.com/)
