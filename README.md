@@ -29,7 +29,7 @@ A Progressive Web App (PWA) built with Vue 3 that displays Pokemon data from the
 
 ## Live Demo
 
-**Live site:** https://pokedex-pwa.up.railway.app/
+**Live site:** https://pk.tdnet.xyz
 
 ### Install as PWA
 On mobile/tablet devices, you can install this as a native app:
