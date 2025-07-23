@@ -1,6 +1,7 @@
 {
     "name": "Pokedex PWA",
     "short_name": "Pokedex",
+    "description": "A Progressive Web App for browsing Pokemon with evolution chains and type filtering",
     "icons": [
         {
           "src": "icons/manifest-icon-192.maskable.png",
@@ -27,8 +28,11 @@
           "purpose": "maskable"
         }
     ],
-    "start_url": "/?home=true",
-    "theme_color": "#42B883",
-    "background_color": "#2C3D4E",
-    "display": "standalone"
+    "start_url": "/",
+    "scope": "/",
+    "theme_color": "#32db8f",
+    "background_color": "#ffffff",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "categories": ["games", "entertainment", "education"]
 }
